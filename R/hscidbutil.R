@@ -31,7 +31,7 @@ compute_c <- function(sql, name = unique_table_name(), overwrite=FALSE, ...) {
   r <- sql %>%
     filter(0==1) %>%
     compute(name=name,temporary=FALSE,...)
-  dbExecute(sql$src$con, str_c("INSERT INTO `",name,"` ",sql %>% dbplyr::remote_query()))
+  dbExecute(sql$src$con, str_c("INSERT INTO ",name," ",sql %>% dbplyr::remote_query()))
   dbExecute(sql$src$con, str_c("SET SESSION storage_engine=",engine))
   r
 }
