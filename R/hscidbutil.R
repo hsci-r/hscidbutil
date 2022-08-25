@@ -25,13 +25,13 @@ unique_table_name <- function() {
 #' @param ... Other arguments passed on to [dbplyr::compute()],
 #' @export
 compute_c <- function(sql, name = unique_table_name(), overwrite=FALSE, ...) {
-  if (overwrite) dbExecute(sql$src$con, str_c("DROP TABLE IF EXISTS ",dbplyr::as.sql(name)))
+  if (overwrite) dbExecute(sql$src$con, str_c("DROP TABLE IF EXISTS ",dbplyr::as.sql(name, sql$src$con)))
   engine <- dbGetQuery(sql$src$con,"SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
   dbExecute(con, "SET SESSION storage_engine=Columnstore")
   r <- sql %>%
     filter(0L==1L) %>%
     compute(name=name,temporary=FALSE,...)
-  dbExecute(sql$src$con, str_c("INSERT INTO ",dbplyr::as.sql(name)," ",sql %>% dbplyr::remote_query()))
+  dbExecute(sql$src$con, str_c("INSERT INTO ",dbplyr::as.sql(name, sql$src$con)," ",sql %>% dbplyr::remote_query()))
   dbExecute(sql$src$con, str_c("SET SESSION storage_engine=",engine))
   r
 }
@@ -43,7 +43,7 @@ compute_c <- function(sql, name = unique_table_name(), overwrite=FALSE, ...) {
 #' @param ... Other arguments passed on to [dbplyr::compute()],
 #' @export
 compute_a <- function(sql, name = unique_table_name(),...) {
-  dbExecute(sql$src$con, str_c("DROP TABLE IF EXISTS ",dbplyr::as.sql(name)))
+  dbExecute(sql$src$con, str_c("DROP TABLE IF EXISTS ",dbplyr::as.sql(name, sql$src$con)))
   engine <- dbGetQuery(sql$src$con,"SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
   dbExecute(con, "SET SESSION storage_engine=Aria")
   r <- sql %>%
