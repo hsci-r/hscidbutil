@@ -47,7 +47,7 @@ compute_a <- function(sql, name = unique_table_name(),...) {
   engine <- dbGetQuery(sql$src$con,"SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
   dbExecute(con, "SET SESSION storage_engine=Aria")
   r <- sql %>%
-    compute(name=name, ...)
+    compute(name=dbplyr::as.sql(name, sql$src$con), ...)
   dbExecute(sql$src$con, str_c("SET SESSION storage_engine=",engine))
   r
 }
