@@ -30,7 +30,7 @@ compute_c <- function(sql, name = unique_table_name(), overwrite=FALSE, ...) {
   dbExecute(con, "SET SESSION storage_engine=Columnstore")
   r <- sql %>%
     filter(0L==1L) %>%
-    compute(name=name,temporary=FALSE,...)
+    compute(name=as.sql(name, sql$scr$con), temporary=FALSE,...)
   dbExecute(sql$src$con, str_c("INSERT INTO ",dbplyr::as.sql(name, sql$src$con)," ",sql %>% dbplyr::remote_query()))
   dbExecute(sql$src$con, str_c("SET SESSION storage_engine=",engine))
   r
