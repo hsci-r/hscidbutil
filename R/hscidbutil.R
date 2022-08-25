@@ -73,7 +73,7 @@ copy_to_c <- function(df,con, name = unique_table_name(),...) {
 copy_to_a <- function(df,con, name = unique_table_name(),...) {
   engine <- dbGetQuery(con,"SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
   dbExecute(con, "SET SESSION storage_engine=Aria")
-  r <- copy_to(con,df,name=name,temporary=F,...)
+  r <- copy_to(con,df,name=name,...)
   dbExecute(con, str_c("SET SESSION storage_engine=",engine))
   r
 }
