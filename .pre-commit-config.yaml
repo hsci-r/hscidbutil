@@ -17,7 +17,9 @@ repos:
     - id: lintr
       args: [--warn_only]
       verbose: true
+    - id: roxygenize
+    - id: deps-in-desc
+    - id: use-tidy-description
     - id: readme-rmd-rendered
     - id: parsable-R
     - id: no-browser-statement
-

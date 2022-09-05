@@ -3,15 +3,16 @@
 #' @export
 #' @importFrom DBI dbGetQuery dbRemoveTable
 delete_temporary_tables <- function(con) {
-  for (tbl in dbGetQuery(con,"SHOW TABLES LIKE 'tmp_%'")[[1]])
-    dbRemoveTable(con,tbl)
+  for (tbl in dbGetQuery(con, "SHOW TABLES LIKE 'tmp_%'")[[1]]) {
+    dbRemoveTable(con, tbl)
+  }
 }
 
 #' Utility function to generate unique table names
 #' @importFrom stats runif
 unique_table_name <- function() {
   # Needs to use option to unique names across reloads while testing
-  i <- getOption("tmp_table_name", floor(runif(1)*1000)*1000) + 1
+  i <- getOption("tmp_table_name", floor(runif(1) * 1000) * 1000) + 1
   options(tmp_table_name = i)
   sprintf("tmp_%03i", i)
 }
@@ -20,7 +21,7 @@ unique_table_name <- function() {
 #' @importFrom DBI dbExecute
 #' @param fe finalizer environment containing connection (con) and table name (table_name)
 delete_table_finalizer <- function(fe) {
-  dbExecute(fe$con,paste0("DROP TABLE IF EXISTS ",fe$table_name))
+  dbExecute(fe$con, paste0("DROP TABLE IF EXISTS ", fe$table_name))
 }
 
 #' ColumnStore version of [dplyr::compute()].
@@ -33,21 +34,21 @@ delete_table_finalizer <- function(fe) {
 #' @importFrom dplyr filter compute
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom stringr str_c
-compute_c <- function(sql, name = unique_table_name(), overwrite=FALSE, temporary=TRUE, ...) {
-  if (overwrite) dbExecute(sql$src$con, str_c("DROP TABLE IF EXISTS ",dbplyr::as.sql(name, sql$src$con)))
-  engine <- dbGetQuery(sql$src$con,"SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
+compute_c <- function(sql, name = unique_table_name(), overwrite = FALSE, temporary = TRUE, ...) {
+  if (overwrite) dbExecute(sql$src$con, str_c("DROP TABLE IF EXISTS ", dbplyr::as.sql(name, sql$src$con)))
+  engine <- dbGetQuery(sql$src$con, "SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
   dbExecute(sql$src$con, "SET SESSION storage_engine=Columnstore")
   r <- sql %>%
-    filter(0L==1L) %>%
-    compute(name=dbplyr::as.sql(name, sql$src$con), temporary=FALSE,...)
-  dbExecute(sql$src$con, str_c("INSERT INTO ",dbplyr::as.sql(name, sql$src$con)," ",sql %>% dbplyr::remote_query()))
-  dbExecute(sql$src$con, str_c("SET SESSION storage_engine=",engine))
-  if (temporary==TRUE) {
+    filter(0L == 1L) %>%
+    compute(name = dbplyr::as.sql(name, sql$src$con), temporary = FALSE, ...)
+  dbExecute(sql$src$con, str_c("INSERT INTO ", dbplyr::as.sql(name, sql$src$con), " ", sql %>% dbplyr::remote_query()))
+  dbExecute(sql$src$con, str_c("SET SESSION storage_engine=", engine))
+  if (temporary == TRUE) {
     fe <- new.env(parent = emptyenv())
     fe$con <- r$src$con
     fe$table_name <- as.character(r$lazy_query$x)
-    attr(r,"finalizer_env") <- fe
-    reg.finalizer(fe, delete_table_finalizer, onexit=TRUE)
+    attr(r, "finalizer_env") <- fe
+    reg.finalizer(fe, delete_table_finalizer, onexit = TRUE)
   }
   r
 }
@@ -61,13 +62,13 @@ compute_c <- function(sql, name = unique_table_name(), overwrite=FALSE, temporar
 #' @importFrom dplyr compute
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom stringr str_c
-compute_a <- function(sql, name = unique_table_name(), overwrite=FALSE, ...) {
-  if (overwrite) dbExecute(sql$src$con, str_c("DROP TABLE IF EXISTS ",dbplyr::as.sql(name, sql$src$con)))
-  engine <- dbGetQuery(sql$src$con,"SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
+compute_a <- function(sql, name = unique_table_name(), overwrite = FALSE, ...) {
+  if (overwrite) dbExecute(sql$src$con, str_c("DROP TABLE IF EXISTS ", dbplyr::as.sql(name, sql$src$con)))
+  engine <- dbGetQuery(sql$src$con, "SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
   dbExecute(sql$src$con, "SET SESSION storage_engine=Aria")
   r <- sql %>%
-    compute(name=dbplyr::as.sql(name, sql$src$con), ...)
-  dbExecute(sql$src$con, str_c("SET SESSION storage_engine=",engine))
+    compute(name = dbplyr::as.sql(name, sql$src$con), ...)
+  dbExecute(sql$src$con, str_c("SET SESSION storage_engine=", engine))
   r
 }
 
@@ -81,17 +82,17 @@ compute_a <- function(sql, name = unique_table_name(), overwrite=FALSE, ...) {
 #' @importFrom dplyr copy_to
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom stringr str_c
-copy_to_c <- function(df, con, name = unique_table_name(),temporary=TRUE,...) {
-  engine <- dbGetQuery(con,"SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
+copy_to_c <- function(df, con, name = unique_table_name(), temporary = TRUE, ...) {
+  engine <- dbGetQuery(con, "SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
   dbExecute(con, "SET SESSION storage_engine=Columnstore")
-  r <- copy_to(con,df,name=name,temporary=FALSE,...)
-  dbExecute(con, str_c("SET SESSION storage_engine=",engine))
-  if (temporary==TRUE) {
+  r <- copy_to(con, df, name = name, temporary = FALSE, ...)
+  dbExecute(con, str_c("SET SESSION storage_engine=", engine))
+  if (temporary == TRUE) {
     fe <- new.env(parent = emptyenv())
     fe$con <- r$src$con
     fe$table_name <- as.character(r$lazy_query$x)
-    attr(r,"finalizer_env") <- fe
-    reg.finalizer(fe, delete_table_finalizer, onexit=TRUE)
+    attr(r, "finalizer_env") <- fe
+    reg.finalizer(fe, delete_table_finalizer, onexit = TRUE)
   }
   r
 }
@@ -105,10 +106,10 @@ copy_to_c <- function(df, con, name = unique_table_name(),temporary=TRUE,...) {
 #' @importFrom dplyr copy_to
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom stringr str_c
-copy_to_a <- function(df, con, name = unique_table_name(),...) {
-  engine <- dbGetQuery(con,"SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
+copy_to_a <- function(df, con, name = unique_table_name(), ...) {
+  engine <- dbGetQuery(con, "SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
   dbExecute(con, "SET SESSION storage_engine=Aria")
-  r <- copy_to(con,df,name=name,...)
-  dbExecute(con, str_c("SET SESSION storage_engine=",engine))
+  r <- copy_to(con, df, name = name, ...)
+  dbExecute(con, str_c("SET SESSION storage_engine=", engine))
   r
 }
