@@ -1,5 +1,5 @@
 test_that("copy_to_c works", {
-  con <- mariadbDefault()
+  con <- RMariaDB::mariadbDefault()
   on.exit(dbDisconnect(con))
 
   x <- data.frame(col1 = 1:10, col2 = letters[1:10])
@@ -15,7 +15,7 @@ test_that("copy_to_c works", {
 })
 
 test_that("copy_to_a works", {
-  con <- mariadbDefault()
+  con <- RMariaDB::mariadbDefault()
   on.exit(dbDisconnect(con))
 
   x <- data.frame(col1 = 1:10, col2 = letters[1:10])
