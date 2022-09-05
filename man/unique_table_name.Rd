@@ -9,3 +9,4 @@ unique_table_name()
 \description{
 Utility function to generate unique table names
 }
+\keyword{internal}

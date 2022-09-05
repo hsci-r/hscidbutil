@@ -9,6 +9,7 @@ delete_temporary_tables <- function(con) {
 }
 
 #' Utility function to generate unique table names
+#' @keywords internal
 #' @importFrom stats runif
 unique_table_name <- function() {
   # Needs to use option to unique names across reloads while testing
@@ -19,6 +20,7 @@ unique_table_name <- function() {
 
 #' Utility finalizer function to remove ColumnStore temporary tables
 #' @importFrom DBI dbExecute
+#' @keywords internal
 #' @param fe finalizer environment containing connection (con) and table name (table_name)
 delete_table_finalizer <- function(fe) {
   dbExecute(fe$con, paste0("DROP TABLE IF EXISTS ", fe$table_name))

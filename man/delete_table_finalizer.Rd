@@ -12,3 +12,4 @@ delete_table_finalizer(fe)
 \description{
 Utility finalizer function to remove ColumnStore temporary tables
 }
+\keyword{internal}
