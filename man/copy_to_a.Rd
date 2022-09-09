@@ -4,7 +4,7 @@
 \alias{copy_to_a}
 \title{Version of \code{\link[dplyr:copy_to]{dplyr::copy_to()}} that creates Aria tables and has a better parameter order}
 \usage{
-copy_to_a(df, con, name = unique_table_name(), ...)
+copy_to_a(df, con, name = unique_table_name(), temporary = TRUE, ...)
 }
 \arguments{
 \item{df}{the dataframe to copy to the SQL store}
@@ -12,6 +12,8 @@ copy_to_a(df, con, name = unique_table_name(), ...)
 \item{con}{the connection to the SQL store}
 
 \item{name}{the name of the table to create (defaults to a new unique table name)}
+
+\item{temporary}{whether to create a temporary table (default \code{TRUE})}
 
 \item{...}{Other arguments passed on to \code{\link[dplyr:copy_to]{dplyr::copy_to()}},}
 }
