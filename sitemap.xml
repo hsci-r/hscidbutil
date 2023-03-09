@@ -31,10 +31,22 @@
     <loc>https://hsci-r.github.io/hscidbutil/reference/delete_temporary_tables.html</loc>
   </url>
   <url>
+    <loc>https://hsci-r.github.io/hscidbutil/reference/get_connection.html</loc>
+  </url>
+  <url>
     <loc>https://hsci-r.github.io/hscidbutil/reference/hscidbutil-package.html</loc>
   </url>
   <url>
     <loc>https://hsci-r.github.io/hscidbutil/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>https://hsci-r.github.io/hscidbutil/reference/list_schemas.html</loc>
+  </url>
+  <url>
+    <loc>https://hsci-r.github.io/hscidbutil/reference/list_temporary_tables.html</loc>
+  </url>
+  <url>
+    <loc>https://hsci-r.github.io/hscidbutil/reference/register_tables.html</loc>
   </url>
   <url>
     <loc>https://hsci-r.github.io/hscidbutil/reference/unique_table_name.html</loc>
