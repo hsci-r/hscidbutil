@@ -180,16 +180,17 @@ compute_a <- function(sql, name = unique_table_name(), overwrite, temporary, ...
 #' @param df the dataframe to copy to the SQL store
 #' @param con the connection to the SQL store
 #' @param name the name of the table to create (defaults to a new unique table name)
+#' @param overwrite whether to overwrite existing tables
 #' @param temporary whether to create a temporary table
 #' @param ... Other arguments passed on to [dplyr::copy_to()],
 #' @export
 #' @importFrom dplyr copy_to
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom stringr str_c
-copy_to_c <- function(df, con, name = unique_table_name(), ...) {
+copy_to_c <- function(df, con, name = unique_table_name(), overwrite, temporary, ...) {
   engine <- dbGetQuery(con, "SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
   dbExecute(con, "SET SESSION storage_engine=Columnstore")
-  r <- copy_to(con, df, name = name, temporary = FALSE, ...)
+  r <- copy_to(con, df, name = name, overwrite = overwrite, temporary = FALSE, ...)
   dbExecute(con, str_c("SET SESSION storage_engine=", engine))
   if (temporary == TRUE) {
     fe <- new.env(parent = emptyenv())
@@ -205,16 +206,17 @@ copy_to_c <- function(df, con, name = unique_table_name(), ...) {
 #' @param df the dataframe to copy to the SQL store
 #' @param con the connection to the SQL store
 #' @param name the name of the table to create (defaults to a new unique table name)
+#' @param overwrite whether to overwrite existing tables
 #' @param temporary whether to create a temporary table
 #' @param ... Other arguments passed on to [dplyr::copy_to()],
 #' @export
 #' @importFrom dplyr copy_to
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom stringr str_c
-copy_to_a <- function(df, con, name = unique_table_name(), ...) {
+copy_to_a <- function(df, con, name = unique_table_name(), overwrite, temporary, ...) {
   engine <- dbGetQuery(con, "SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
   dbExecute(con, "SET SESSION storage_engine=Aria")
-  r <- copy_to(con, df, name = name, temporary = FALSE, ...)
+  r <- copy_to(con, df, name = name, overwrite = overwrite, temporary = FALSE, ...)
   dbExecute(con, str_c("SET SESSION storage_engine=", engine))
   if (temporary == TRUE) {
     fe <- new.env(parent = emptyenv())
