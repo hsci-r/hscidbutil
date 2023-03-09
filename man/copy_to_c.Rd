@@ -4,7 +4,7 @@
 \alias{copy_to_c}
 \title{Version of \code{\link[dplyr:copy_to]{dplyr::copy_to()}} that creates ColumnStore tables and has a better parameter order}
 \usage{
-copy_to_c(df, con, name = unique_table_name(), temporary = TRUE, ...)
+copy_to_c(df, con, name = unique_table_name(), ...)
 }
 \arguments{
 \item{df}{the dataframe to copy to the SQL store}
@@ -13,9 +13,9 @@ copy_to_c(df, con, name = unique_table_name(), temporary = TRUE, ...)
 
 \item{name}{the name of the table to create (defaults to a new unique table name)}
 
-\item{temporary}{whether to create a temporary table (default \code{TRUE})}
-
 \item{...}{Other arguments passed on to \code{\link[dplyr:copy_to]{dplyr::copy_to()}},}
+
+\item{temporary}{whether to create a temporary table}
 }
 \description{
 Version of \code{\link[dplyr:copy_to]{dplyr::copy_to()}} that creates ColumnStore tables and has a better parameter order

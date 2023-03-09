@@ -4,22 +4,16 @@
 \alias{compute_a}
 \title{Version of \code{\link[dplyr:compute]{dplyr::compute()}} that creates Aria tables.}
 \usage{
-compute_a(
-  sql,
-  name = unique_table_name(),
-  overwrite = FALSE,
-  temporary = TRUE,
-  ...
-)
+compute_a(sql, name = unique_table_name(), overwrite, temporary, ...)
 }
 \arguments{
 \item{sql}{the sql to compute}
 
 \item{name}{the name of the table to create (defaults to a new unique table name)}
 
-\item{overwrite}{whether to overwrite existing tables (default \code{FALSE})}
+\item{overwrite}{whether to overwrite existing tables}
 
-\item{temporary}{whether to create a temporary table (default \code{TRUE})}
+\item{temporary}{whether to create a temporary table}
 
 \item{...}{Other arguments passed on to \code{\link[dplyr:compute]{dplyr::compute()}},}
 }

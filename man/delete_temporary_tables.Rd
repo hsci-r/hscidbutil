@@ -2,13 +2,15 @@
 % Please edit documentation in R/hscidbutil.R
 \name{delete_temporary_tables}
 \alias{delete_temporary_tables}
-\title{Delete all "temporary" tables starting with \code{tmp_} in the database}
+\title{Delete all "temporary" tables starting with \code{tmp_} in the given schemas}
 \usage{
-delete_temporary_tables(con)
+delete_temporary_tables(con, schemas)
 }
 \arguments{
 \item{con}{the connection to probe}
+
+\item{schemas}{the schemas to probe}
 }
 \description{
-Delete all "temporary" tables starting with \code{tmp_} in the database
+Delete all "temporary" tables starting with \code{tmp_} in the given schemas
 }
