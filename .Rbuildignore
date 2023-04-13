@@ -6,3 +6,5 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+^\.lintr$
+^\.pre-commit-config.yaml$

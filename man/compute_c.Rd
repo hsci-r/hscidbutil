@@ -4,16 +4,16 @@
 \alias{compute_c}
 \title{ColumnStore version of \code{\link[dplyr:compute]{dplyr::compute()}}.}
 \usage{
-compute_c(sql, name = unique_table_name(), overwrite, temporary, ...)
+compute_c(sql, name, temporary, overwrite, ...)
 }
 \arguments{
 \item{sql}{the sql to compute}
 
 \item{name}{the name of the table to create (defaults to a new unique table name)}
 
-\item{overwrite}{whether to overwrite existing tables}
+\item{temporary}{whether to create a temporary table (defaults to TRUE if table name not specified, otherwise needs to be explicitly specified)}
 
-\item{temporary}{whether to create a temporary table}
+\item{overwrite}{whether to overwrite existing tables (default to TRUE for temporary tables, FALSE otherwise)}
 
 \item{...}{Other arguments passed on to \code{\link[dplyr:compute]{dplyr::compute()}},}
 }

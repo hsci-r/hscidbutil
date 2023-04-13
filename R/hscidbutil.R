@@ -11,32 +11,32 @@
 #' @importFrom RMariaDB MariaDB
 #' @importFrom stringr str_c
 #' @importFrom DBI dbConnect
-get_connection <- function(db_params=here("db_params.yaml"),db_secret=here("db_secret.yaml"),bigint="integer", ...) {
-  while (!exists("con", inherits=FALSE)) {
+get_connection <- function(db_params = here("db_params.yaml"), db_secret = here("db_secret.yaml"), bigint = "integer", ...) {
+  while (!exists("con", inherits = FALSE)) {
     db_host <- Sys.getenv("DB_HOST")
     db_name <- Sys.getenv("DB_NAME")
     db_user <- Sys.getenv("DB_USER")
     db_pass <- Sys.getenv("DB_PASS")
     if (file.exists(db_params)) {
       db_params_dict <- read_yaml(db_params)
-      if (db_host=="" && !is.null(db_params_dict$db_host)) db_host <- db_params_dict$db_host
-      if (db_name=="" && !is.null(db_params_dict$db_name)) db_name <- db_params_dict$db_name
-      if (db_user=="" && !is.null(db_params_dict$db_user)) db_user <- db_params_dict$db_user
+      if (db_host == "" && !is.null(db_params_dict$db_host)) db_host <- db_params_dict$db_host
+      if (db_name == "" && !is.null(db_params_dict$db_name)) db_name <- db_params_dict$db_name
+      if (db_user == "" && !is.null(db_params_dict$db_user)) db_user <- db_params_dict$db_user
     }
     if (file.exists(db_secret)) {
       db_secret_dict <- read_yaml(db_secret)
-      if (db_host=="" && !is.null(db_secret_dict$db_host)) db_host <- db_secret_dict$db_host
-      if (db_name=="" && !is.null(db_secret_dict$db_name)) db_name <- db_secret_dict$db_name
-      if (db_user=="" && !is.null(db_secret_dict$db_user)) db_user <- db_secret_dict$db_user
-      if (db_pass=="" && !is.null(db_secret_dict$db_pass)) db_pass <- db_secret_dict$db_pass
+      if (db_host == "" && !is.null(db_secret_dict$db_host)) db_host <- db_secret_dict$db_host
+      if (db_name == "" && !is.null(db_secret_dict$db_name)) db_name <- db_secret_dict$db_name
+      if (db_user == "" && !is.null(db_secret_dict$db_user)) db_user <- db_secret_dict$db_user
+      if (db_pass == "" && !is.null(db_secret_dict$db_pass)) db_pass <- db_secret_dict$db_pass
     }
-    if (db_host=="" || db_name=="") stop(str_c("Could not derive all required variables for database connectivity. Have db_host:",db_host,", db_name:",db_name))
+    if (db_host == "" || db_name == "") stop(str_c("Could not derive all required variables for database connectivity. Have db_host:", db_host, ", db_name:", db_name))
     tryCatch(con <- dbConnect(
       drv = MariaDB(),
       host = db_host,
       dbname = db_name,
-      user = if (db_user!="") db_user else key_get(db_name,"DB_USER"),
-      password = if (db_pass!="") db_pass else key_get(db_name,"DB_PASS"),
+      user = if (db_user != "") db_user else key_get(db_name, "DB_USER"),
+      password = if (db_pass != "") db_pass else key_get(db_name, "DB_PASS"),
       bigint = bigint,
       load_data_local_infile = TRUE,
       autocommit = TRUE,
@@ -44,8 +44,8 @@ get_connection <- function(db_params=here("db_params.yaml"),db_secret=here("db_s
       ...
     ), error = function(e) {
       print(e)
-      key_set(db_name,"DB_USER", prompt="Database username: ")
-      key_set(db_name,"DB_PASS", prompt="Database password: ")
+      if (db_user == "") key_set(db_name, "DB_USER", prompt = "Database username: ")
+      if (db_pass == "") key_set(db_name, "DB_PASS", prompt = "Database password: ")
     })
   }
   con
@@ -57,7 +57,7 @@ get_connection <- function(db_params=here("db_params.yaml"),db_secret=here("db_s
 #' @importFrom dplyr tbl pull
 #' @importFrom dbplyr in_schema
 list_schemas <- function(con) {
-  tbl(con, dbplyr::in_schema("information_schema","SCHEMATA")) %>%
+  tbl(con, dbplyr::in_schema("information_schema", "SCHEMATA")) %>%
     pull("SCHEMA_NAME")
 }
 
@@ -69,12 +69,13 @@ list_schemas <- function(con) {
 #' @importFrom dplyr tbl filter select collect
 #' @importFrom purrr walk2
 #' @importFrom dbplyr in_schema
-register_tables <- function(con, schemas, envir=.GlobalEnv) {
-  d <- tbl(con, dbplyr::in_schema("information_schema","TABLES")) %>%
-    filter(TABLE_SCHEMA %in% schemas) %>%
-    select(TABLE_SCHEMA, TABLE_NAME) %>%
+#' @importFrom rlang .data
+register_tables <- function(con, schemas, envir = .GlobalEnv) {
+  d <- tbl(con, dbplyr::in_schema("information_schema", "TABLES")) %>%
+    filter(.data$TABLE_SCHEMA %in% schemas) %>%
+    select(.data$TABLE_SCHEMA, .data$TABLE_NAME) %>%
     collect()
-  walk2(d$TABLE_NAME, d$TABLE_SCHEMA, ~try(assign(.x, tbl(con, dbplyr::in_schema(.y, .x)), envir = envir)))
+  walk2(d$TABLE_NAME, d$TABLE_SCHEMA, ~ try(assign(.x, tbl(con, dbplyr::in_schema(.y, .x)), envir = envir)))
 }
 
 #' List all "temporary" tables starting with `tmp_` in the given schema
@@ -84,10 +85,11 @@ register_tables <- function(con, schemas, envir=.GlobalEnv) {
 #' @importFrom dplyr tbl filter select collect
 #' @importFrom dbplyr in_schema
 #' @importFrom stringr str_detect
+#' @importFrom rlang .data
 list_temporary_tables <- function(con, schemas) {
-  tbl(con, dbplyr::in_schema("information_schema","TABLES")) %>%
-    filter(TABLE_SCHEMA %in% schemas,str_detect(TABLE_NAME,"^tmp_")) %>%
-    select(TABLE_SCHEMA,TABLE_NAME) %>%
+  tbl(con, dbplyr::in_schema("information_schema", "TABLES")) %>%
+    filter(.data$TABLE_SCHEMA %in% schemas, str_detect(.data$TABLE_NAME, "^tmp_")) %>%
+    select(.data$TABLE_SCHEMA, .data$TABLE_NAME) %>%
     collect()
 }
 
@@ -99,7 +101,7 @@ list_temporary_tables <- function(con, schemas) {
 #' @importFrom purrr walk2
 delete_temporary_tables <- function(con, schemas) {
   d <- list_temporary_tables(con, schemas)
-  walk2(d$TABLE_SCHEMA,d$TABLE_NAME, ~dbRemoveTable(con, Id(schema=.x, table=.y)))
+  walk2(d$TABLE_SCHEMA, d$TABLE_NAME, ~ dbRemoveTable(con, Id(schema = .x, table = .y)))
 }
 
 #' Utility function to generate unique table names
@@ -123,14 +125,22 @@ delete_table_finalizer <- function(fe) {
 #' ColumnStore version of [dplyr::compute()].
 #' @param sql the sql to compute
 #' @param name the name of the table to create (defaults to a new unique table name)
-#' @param overwrite whether to overwrite existing tables
-#' @param temporary whether to create a temporary table
+#' @param temporary whether to create a temporary table (defaults to TRUE if table name not specified, otherwise needs to be explicitly specified)
+#' @param overwrite whether to overwrite existing tables (default to TRUE for temporary tables, FALSE otherwise)
 #' @param ... Other arguments passed on to [dplyr::compute()],
 #' @export
 #' @importFrom dplyr filter compute
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom stringr str_c
-compute_c <- function(sql, name = unique_table_name(), overwrite, temporary, ...) {
+compute_c <- function(sql, name, temporary, overwrite, ...) {
+  if (missing(name)) {
+    name <- unique_table_name()
+    if (missing(temporary)) {
+      temporary <- TRUE
+    }
+  }
+  if (missing(temporary)) stop('argument "temporary" is missing, with no default')
+  if (missing(overwrite)) overwrite <- temporary
   if (overwrite) dbExecute(sql$src$con, str_c("DROP TABLE IF EXISTS ", dbplyr::as.sql(name, sql$src$con)))
   engine <- dbGetQuery(sql$src$con, "SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
   dbExecute(sql$src$con, "SET SESSION storage_engine=Columnstore")
@@ -152,14 +162,22 @@ compute_c <- function(sql, name = unique_table_name(), overwrite, temporary, ...
 #' Version of [dplyr::compute()] that creates Aria tables.
 #' @param sql the sql to compute
 #' @param name the name of the table to create (defaults to a new unique table name)
-#' @param overwrite whether to overwrite existing tables
-#' @param temporary whether to create a temporary table
+#' @param temporary whether to create a temporary table (defaults to TRUE if table name not specified, otherwise needs to be explicitly specified)
+#' @param overwrite whether to overwrite existing tables (default to TRUE for temporary tables, FALSE otherwise)
 #' @param ... Other arguments passed on to [dplyr::compute()],
 #' @export
 #' @importFrom dplyr compute
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom stringr str_c
-compute_a <- function(sql, name = unique_table_name(), overwrite, temporary, ...) {
+compute_a <- function(sql, name, temporary, overwrite, ...) {
+  if (missing(name)) {
+    name <- unique_table_name()
+    if (missing(temporary)) {
+      temporary <- TRUE
+    }
+  }
+  if (missing(temporary)) stop('argument "temporary" is missing, with no default')
+  if (missing(overwrite)) overwrite <- temporary
   if (overwrite) dbExecute(sql$src$con, str_c("DROP TABLE IF EXISTS ", dbplyr::as.sql(name, sql$src$con)))
   engine <- dbGetQuery(sql$src$con, "SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
   dbExecute(sql$src$con, "SET SESSION storage_engine=Aria")
@@ -180,14 +198,22 @@ compute_a <- function(sql, name = unique_table_name(), overwrite, temporary, ...
 #' @param df the dataframe to copy to the SQL store
 #' @param con the connection to the SQL store
 #' @param name the name of the table to create (defaults to a new unique table name)
-#' @param overwrite whether to overwrite existing tables
-#' @param temporary whether to create a temporary table
+#' @param temporary whether to create a temporary table (defaults to TRUE if table name not specified, otherwise needs to be explicitly specified)
+#' @param overwrite whether to overwrite existing tables (default to TRUE for temporary tables, FALSE otherwise)
 #' @param ... Other arguments passed on to [dplyr::copy_to()],
 #' @export
 #' @importFrom dplyr copy_to
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom stringr str_c
-copy_to_c <- function(df, con, name = unique_table_name(), overwrite, temporary, ...) {
+copy_to_c <- function(df, con, name, temporary, overwrite, ...) {
+  if (missing(name)) {
+    name <- unique_table_name()
+    if (missing(temporary)) {
+      temporary <- TRUE
+    }
+  }
+  if (missing(temporary)) stop('argument "temporary" is missing, with no default')
+  if (missing(overwrite)) overwrite <- temporary
   engine <- dbGetQuery(con, "SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
   dbExecute(con, "SET SESSION storage_engine=Columnstore")
   r <- copy_to(con, df, name = name, overwrite = overwrite, temporary = FALSE, ...)
@@ -206,14 +232,22 @@ copy_to_c <- function(df, con, name = unique_table_name(), overwrite, temporary,
 #' @param df the dataframe to copy to the SQL store
 #' @param con the connection to the SQL store
 #' @param name the name of the table to create (defaults to a new unique table name)
-#' @param overwrite whether to overwrite existing tables
 #' @param temporary whether to create a temporary table
+#' @param overwrite whether to overwrite existing tables (default to TRUE for temporary tables, FALSE otherwise)
 #' @param ... Other arguments passed on to [dplyr::copy_to()],
 #' @export
 #' @importFrom dplyr copy_to
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom stringr str_c
-copy_to_a <- function(df, con, name = unique_table_name(), overwrite, temporary, ...) {
+copy_to_a <- function(df, con, name, temporary, overwrite, ...) {
+  if (missing(name)) {
+    name <- unique_table_name()
+    if (missing(temporary)) {
+      temporary <- TRUE
+    }
+  }
+  if (missing(temporary)) stop('argument "temporary" is missing, with no default')
+  if (missing(overwrite)) overwrite <- temporary
   engine <- dbGetQuery(con, "SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
   dbExecute(con, "SET SESSION storage_engine=Aria")
   r <- copy_to(con, df, name = name, overwrite = overwrite, temporary = FALSE, ...)
