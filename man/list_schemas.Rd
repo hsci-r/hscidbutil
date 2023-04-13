@@ -9,6 +9,9 @@ list_schemas(con)
 \arguments{
 \item{con}{the connection to probe}
 }
+\value{
+a list of the schemas defined in the database
+}
 \description{
 List schemas in a database
 }

@@ -21,6 +21,9 @@ get_connection(
 
 \item{...}{Other arguments passed on to \code{\link[DBI:dbConnect]{DBI::dbConnect()}},}
 }
+\value{
+the MariaDB connection object
+}
 \description{
 Get a database connection as defined by a yaml configuration
 or environment variables

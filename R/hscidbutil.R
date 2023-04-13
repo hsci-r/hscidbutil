@@ -11,6 +11,7 @@
 #' @importFrom RMariaDB MariaDB
 #' @importFrom stringr str_c
 #' @importFrom DBI dbConnect
+#' @return the MariaDB connection object
 get_connection <- function(db_params = here("db_params.yaml"), db_secret = here("db_secret.yaml"), bigint = "integer", ...) {
   while (!exists("con", inherits = FALSE)) {
     db_host <- Sys.getenv("DB_HOST")
@@ -56,6 +57,7 @@ get_connection <- function(db_params = here("db_params.yaml"), db_secret = here(
 #' @export
 #' @importFrom dplyr tbl pull
 #' @importFrom dbplyr in_schema
+#' @return a list of the schemas defined in the database
 list_schemas <- function(con) {
   tbl(con, dbplyr::in_schema("information_schema", "SCHEMATA")) %>%
     pull("SCHEMA_NAME")
@@ -80,33 +82,35 @@ register_tables <- function(con, schemas, envir = .GlobalEnv) {
 
 #' List all "temporary" tables starting with `tmp_` in the given schema
 #' @param con the connection to probe
-#' @param schemas the schemas to probe
+#' @param ... the schemas to probe
 #' @export
 #' @importFrom dplyr tbl filter select collect
 #' @importFrom dbplyr in_schema
 #' @importFrom stringr str_detect
 #' @importFrom rlang .data
-list_temporary_tables <- function(con, schemas) {
+#' @return a tibble with TABLE_SCHEMA and TABLE_NAME columns containing information of the temporary tables found.
+list_temporary_tables <- function(con, ...) {
   tbl(con, dbplyr::in_schema("information_schema", "TABLES")) %>%
-    filter(.data$TABLE_SCHEMA %in% schemas, str_detect(.data$TABLE_NAME, "^tmp_")) %>%
+    filter(.data$TABLE_SCHEMA %in% list(...), str_detect(.data$TABLE_NAME, "^tmp_")) %>%
     select(.data$TABLE_SCHEMA, .data$TABLE_NAME) %>%
     collect()
 }
 
 #' Delete all "temporary" tables starting with `tmp_` in the given schemas
 #' @param con the connection to probe
-#' @param schemas the schemas to probe
+#' @param ... the schemas to probe
 #' @export
 #' @importFrom DBI dbRemoveTable Id
 #' @importFrom purrr walk2
-delete_temporary_tables <- function(con, schemas) {
-  d <- list_temporary_tables(con, schemas)
+delete_temporary_tables <- function(con, ...) {
+  d <- list_temporary_tables(con, ...)
   walk2(d$TABLE_SCHEMA, d$TABLE_NAME, ~ dbRemoveTable(con, Id(schema = .x, table = .y)))
 }
 
 #' Utility function to generate unique table names
 #' @keywords internal
 #' @importFrom stats runif
+#' @return a unique table name
 unique_table_name <- function() {
   # Needs to use option to unique names across reloads while testing
   i <- getOption("tmp_table_name", floor(runif(1) * 1000) * 1000) + 1
@@ -132,6 +136,7 @@ delete_table_finalizer <- function(fe) {
 #' @importFrom dplyr filter compute
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom stringr str_c
+#' @return a dbplyr tbl referencing the table computed
 compute_c <- function(sql, name, temporary, overwrite, ...) {
   if (missing(name)) {
     name <- unique_table_name()
@@ -169,6 +174,7 @@ compute_c <- function(sql, name, temporary, overwrite, ...) {
 #' @importFrom dplyr compute
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom stringr str_c
+#' @return a dbplyr tbl referencing the table computed
 compute_a <- function(sql, name, temporary, overwrite, ...) {
   if (missing(name)) {
     name <- unique_table_name()
@@ -205,6 +211,7 @@ compute_a <- function(sql, name, temporary, overwrite, ...) {
 #' @importFrom dplyr copy_to
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom stringr str_c
+#' @return a dbplyr tbl referencing the table created
 copy_to_c <- function(df, con, name, temporary, overwrite, ...) {
   if (missing(name)) {
     name <- unique_table_name()
@@ -239,6 +246,7 @@ copy_to_c <- function(df, con, name, temporary, overwrite, ...) {
 #' @importFrom dplyr copy_to
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom stringr str_c
+#' @return a dbplyr tbl referencing the table created
 copy_to_a <- function(df, con, name, temporary, overwrite, ...) {
   if (missing(name)) {
     name <- unique_table_name()

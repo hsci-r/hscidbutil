@@ -19,6 +19,9 @@ copy_to_a(df, con, name, temporary, overwrite, ...)
 
 \item{...}{Other arguments passed on to \code{\link[dplyr:copy_to]{dplyr::copy_to()}},}
 }
+\value{
+a dbplyr tbl referencing the table created
+}
 \description{
 Version of \code{\link[dplyr:copy_to]{dplyr::copy_to()}} that creates Aria tables and has a better parameter order
 }

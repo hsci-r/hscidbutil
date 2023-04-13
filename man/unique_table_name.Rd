@@ -6,6 +6,9 @@
 \usage{
 unique_table_name()
 }
+\value{
+a unique table name
+}
 \description{
 Utility function to generate unique table names
 }

@@ -17,6 +17,9 @@ compute_a(sql, name, temporary, overwrite, ...)
 
 \item{...}{Other arguments passed on to \code{\link[dplyr:compute]{dplyr::compute()}},}
 }
+\value{
+a dbplyr tbl referencing the table computed
+}
 \description{
 Version of \code{\link[dplyr:compute]{dplyr::compute()}} that creates Aria tables.
 }

@@ -4,12 +4,12 @@
 \alias{delete_temporary_tables}
 \title{Delete all "temporary" tables starting with \code{tmp_} in the given schemas}
 \usage{
-delete_temporary_tables(con, schemas)
+delete_temporary_tables(con, ...)
 }
 \arguments{
 \item{con}{the connection to probe}
 
-\item{schemas}{the schemas to probe}
+\item{...}{the schemas to probe}
 }
 \description{
 Delete all "temporary" tables starting with \code{tmp_} in the given schemas
