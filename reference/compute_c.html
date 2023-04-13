@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">hscidbutil</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_c</span><span class="op">(</span><span class="va">sql</span>, name <span class="op">=</span> <span class="fu"><a href="unique_table_name.html">unique_table_name</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">overwrite</span>, <span class="va">temporary</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_c</span><span class="op">(</span><span class="va">sql</span>, <span class="va">name</span>, <span class="va">temporary</span>, <span class="va">overwrite</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -55,12 +55,12 @@
 <dd><p>the name of the table to create (defaults to a new unique table name)</p></dd>
 
 
-<dt>overwrite</dt>
-<dd><p>whether to overwrite existing tables</p></dd>
-
-
 <dt>temporary</dt>
-<dd><p>whether to create a temporary table</p></dd>
+<dd><p>whether to create a temporary table (defaults to TRUE if table name not specified, otherwise needs to be explicitly specified)</p></dd>
+
+
+<dt>overwrite</dt>
+<dd><p>whether to overwrite existing tables (default to TRUE for temporary tables, FALSE otherwise)</p></dd>
 
 
 <dt>...</dt>
