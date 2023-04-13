@@ -90,8 +90,9 @@ register_tables <- function(con, schemas, envir = .GlobalEnv) {
 #' @importFrom rlang .data
 #' @return a tibble with TABLE_SCHEMA and TABLE_NAME columns containing information of the temporary tables found.
 list_temporary_tables <- function(con, ...) {
+  schemas <- list(...)
   tbl(con, dbplyr::in_schema("information_schema", "TABLES")) %>%
-    filter(.data$TABLE_SCHEMA %in% list(...), str_detect(.data$TABLE_NAME, "^tmp_")) %>%
+    filter(.data$TABLE_SCHEMA %in% schemas, str_detect(.data$TABLE_NAME, "^tmp_")) %>%
     select(.data$TABLE_SCHEMA, .data$TABLE_NAME) %>%
     collect()
 }
