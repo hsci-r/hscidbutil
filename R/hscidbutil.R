@@ -147,18 +147,19 @@ compute_c <- function(sql, name, temporary, overwrite, ...) {
   }
   if (missing(temporary)) stop('argument "temporary" is missing, with no default')
   if (missing(overwrite)) overwrite <- temporary
-  if (overwrite) dbExecute(sql$src$con, str_c("DROP TABLE IF EXISTS ", dbplyr::as.sql(name, sql$src$con)))
-  engine <- dbGetQuery(sql$src$con, "SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
-  dbExecute(sql$src$con, "SET SESSION storage_engine=Columnstore")
+  con <- sql %>% dbplyr::remote_con()
+  if (overwrite) dbExecute(con, str_c("DROP TABLE IF EXISTS ", dbplyr::as.sql(name, con)))
+  engine <- dbGetQuery(con, "SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
+  dbExecute(con, "SET SESSION storage_engine=Columnstore")
   r <- sql %>%
     filter(0L == 1L) %>%
-    compute(name = dbplyr::as.sql(name, sql$src$con), temporary = FALSE, ...)
-  dbExecute(sql$src$con, str_c("INSERT INTO ", dbplyr::as.sql(name, sql$src$con), " ", sql %>% dbplyr::remote_query()))
-  dbExecute(sql$src$con, str_c("SET SESSION storage_engine=", engine))
+    compute(name = dbplyr::as.sql(name, con), temporary = FALSE, ...)
+  dbExecute(con, str_c("INSERT INTO ", dbplyr::as.sql(name, con), " ", sql %>% dbplyr::remote_query()))
+  dbExecute(con, str_c("SET SESSION storage_engine=", engine))
   if (temporary == TRUE) {
     fe <- new.env(parent = emptyenv())
-    fe$con <- r$src$con
-    fe$table_name <- as.character(r$lazy_query$x)
+    fe$con <- con
+    fe$table_name <- r %>% dbplyr::remote_name()
     attr(r, "finalizer_env") <- fe
     reg.finalizer(fe, delete_table_finalizer, onexit = TRUE)
   }
@@ -185,16 +186,17 @@ compute_a <- function(sql, name, temporary, overwrite, ...) {
   }
   if (missing(temporary)) stop('argument "temporary" is missing, with no default')
   if (missing(overwrite)) overwrite <- temporary
-  if (overwrite) dbExecute(sql$src$con, str_c("DROP TABLE IF EXISTS ", dbplyr::as.sql(name, sql$src$con)))
-  engine <- dbGetQuery(sql$src$con, "SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
-  dbExecute(sql$src$con, "SET SESSION storage_engine=Aria")
+  con <- sql %>% dbplyr::remote_con()
+  if (overwrite) dbExecute(sql$src$con, str_c("DROP TABLE IF EXISTS ", dbplyr::as.sql(name, con)))
+  engine <- dbGetQuery(con, "SHOW SESSION VARIABLES LIKE 'storage_engine'")[[2]]
+  dbExecute(con, "SET SESSION storage_engine=Aria")
   r <- sql %>%
-    compute(name = dbplyr::as.sql(name, sql$src$con), temporary = FALSE, ...)
-  dbExecute(sql$src$con, str_c("SET SESSION storage_engine=", engine))
+    compute(name = dbplyr::as.sql(name, con), temporary = FALSE, ...)
+  dbExecute(con, str_c("SET SESSION storage_engine=", engine))
   if (temporary == TRUE) {
     fe <- new.env(parent = emptyenv())
-    fe$con <- r$src$con
-    fe$table_name <- as.character(r$lazy_query$x)
+    fe$con <- con
+    fe$table_name <- r %>% dbplyr::remote_name()
     attr(r, "finalizer_env") <- fe
     reg.finalizer(fe, delete_table_finalizer, onexit = TRUE)
   }
@@ -228,8 +230,8 @@ copy_to_c <- function(df, con, name, temporary, overwrite, ...) {
   dbExecute(con, str_c("SET SESSION storage_engine=", engine))
   if (temporary == TRUE) {
     fe <- new.env(parent = emptyenv())
-    fe$con <- r$src$con
-    fe$table_name <- as.character(r$lazy_query$x)
+    fe$con <- con
+    fe$table_name <- r %>% dbplyr::remote_name()
     attr(r, "finalizer_env") <- fe
     reg.finalizer(fe, delete_table_finalizer, onexit = TRUE)
   }
@@ -263,8 +265,8 @@ copy_to_a <- function(df, con, name, temporary, overwrite, ...) {
   dbExecute(con, str_c("SET SESSION storage_engine=", engine))
   if (temporary == TRUE) {
     fe <- new.env(parent = emptyenv())
-    fe$con <- r$src$con
-    fe$table_name <- as.character(r$lazy_query$x)
+    fe$con <- con
+    fe$table_name <- r %>% dbplyr::remote_name()
     attr(r, "finalizer_env") <- fe
     reg.finalizer(fe, delete_table_finalizer, onexit = TRUE)
   }
