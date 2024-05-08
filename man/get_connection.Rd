@@ -6,16 +6,19 @@
 or environment variables}
 \usage{
 get_connection(
-  db_params = here("db_params.yaml"),
-  db_secret = here("db_secret.yaml"),
+  params = here("params.yaml"),
+  secret = here("secret.yaml"),
+  key = "db",
   bigint = "integer",
   ...
 )
 }
 \arguments{
-\item{db_params}{a db_params.yaml-file that defines db_host, db_name and db_user}
+\item{params}{a params.yaml-file that defines some of db_host, db_name and db_user under a given key}
 
-\item{db_secret}{a db_secret.yaml-file that defines db_pass and optionally overrides other values}
+\item{secret}{a secret.yaml-file that defines some of db_host, db_name, db_user and db_pass under a given key}
+
+\item{key}{the key in the yaml file to extract}
 
 \item{bigint}{how should the connection convert bigints}
 

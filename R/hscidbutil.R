@@ -1,55 +1,48 @@
 #' Get a database connection as defined by a yaml configuration
 #' or environment variables
-#' @param db_params a db_params.yaml-file that defines db_host, db_name and db_user
-#' @param db_secret a db_secret.yaml-file that defines db_pass and optionally overrides other values
+#' @param params a params.yaml-file that defines some of db_host, db_name and db_user under a given key
+#' @param secret a secret.yaml-file that defines some of db_host, db_name, db_user and db_pass under a given key
+#' @param key the key in the yaml file to extract
 #' @param bigint how should the connection convert bigints
 #' @param ... Other arguments passed on to [DBI::dbConnect()],
 #' @export
 #' @importFrom here here
-#' @importFrom keyring key_set key_get
 #' @importFrom yaml read_yaml
 #' @importFrom RMariaDB MariaDB
 #' @importFrom stringr str_c
 #' @importFrom DBI dbConnect
 #' @return the MariaDB connection object
-get_connection <- function(db_params = here("db_params.yaml"), db_secret = here("db_secret.yaml"), bigint = "integer", ...) {
-  while (!exists("con", inherits = FALSE)) {
-    db_host <- Sys.getenv("DB_HOST")
-    db_name <- Sys.getenv("DB_NAME")
-    db_user <- Sys.getenv("DB_USER")
-    db_pass <- Sys.getenv("DB_PASS")
-    if (file.exists(db_params)) {
-      db_params_dict <- read_yaml(db_params)
-      if (db_host == "" && !is.null(db_params_dict$db_host)) db_host <- db_params_dict$db_host
-      if (db_name == "" && !is.null(db_params_dict$db_name)) db_name <- db_params_dict$db_name
-      if (db_user == "" && !is.null(db_params_dict$db_user)) db_user <- db_params_dict$db_user
-    }
-    if (file.exists(db_secret)) {
-      db_secret_dict <- read_yaml(db_secret)
-      if (db_host == "" && !is.null(db_secret_dict$db_host)) db_host <- db_secret_dict$db_host
-      if (db_name == "" && !is.null(db_secret_dict$db_name)) db_name <- db_secret_dict$db_name
-      if (db_user == "" && !is.null(db_secret_dict$db_user)) db_user <- db_secret_dict$db_user
-      if (db_pass == "" && !is.null(db_secret_dict$db_pass)) db_pass <- db_secret_dict$db_pass
-    }
-    if (db_host == "" || db_name == "") stop(str_c("Could not derive all required variables for database connectivity. Have db_host:", db_host, ", db_name:", db_name))
-    tryCatch(con <- dbConnect(
-      drv = MariaDB(),
-      host = db_host,
-      dbname = db_name,
-      user = if (db_user != "") db_user else key_get(db_name, "DB_USER"),
-      password = if (db_pass != "") db_pass else key_get(db_name, "DB_PASS"),
-      bigint = bigint,
-      load_data_local_infile = TRUE,
-      autocommit = TRUE,
-      reconnect = TRUE,
-      ...
-    ), error = function(e) {
-      print(e)
-      if (db_user == "") key_set(db_name, "DB_USER", prompt = "Database username: ")
-      if (db_pass == "") key_set(db_name, "DB_PASS", prompt = "Database password: ")
-    })
+get_connection <- function(params = here("params.yaml"), secret = here("secret.yaml"), key="db", bigint = "integer", ...) {
+  db_host <- Sys.getenv("DB_HOST")
+  db_name <- Sys.getenv("DB_NAME")
+  db_user <- Sys.getenv("DB_USER")
+  db_pass <- Sys.getenv("DB_PASS")
+  if (file.exists(params)) {
+    params_dict <- read_yaml(params)
+    if (db_host == "" && !is.null(params_dict[[key]]$db_host)) db_host <- db_params_dict[[key]]$db_host
+    if (db_name == "" && !is.null(params_dict[[key]]$db_name)) db_name <- db_params_dict[[key]]$db_name
+    if (db_user == "" && !is.null(params_dict[[key]]$db_user)) db_user <- db_params_dict[[key]]$db_user
   }
-  con
+  if (file.exists(secret)) {
+    secret_dict <- read_yaml(secret)
+    if (db_host == "" && !is.null(secret_dict[[key]]$db_host)) db_host <- db_secret_dict[[key]]$db_host
+    if (db_name == "" && !is.null(secret_dict[[key]]$db_name)) db_name <- db_secret_dict[[key]]$db_name
+    if (db_user == "" && !is.null(secret_dict[[key]]$db_user)) db_user <- db_secret_dict[[key]]$db_user
+    if (db_pass == "" && !is.null(secret_dict[[key]]$db_pass)) db_pass <- db_secret_dict[[key]]$db_pass
+  }
+  if (db_host == "" || db_name == "") stop(str_c("Could not derive all required variables for database connectivity. Have db_host:", db_host, ", db_name:", db_name))
+  return(dbConnect(
+    drv = MariaDB(),
+    host = db_host,
+    dbname = db_name,
+    user = db_user,
+    password = db_pass,
+    bigint = bigint,
+    load_data_local_infile = TRUE,
+    autocommit = TRUE,
+    reconnect = TRUE,
+    ...
+  ))
 }
 
 #' List schemas in a database
