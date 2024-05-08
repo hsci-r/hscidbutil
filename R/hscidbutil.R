@@ -19,16 +19,16 @@ get_connection <- function(params = here("params.yaml"), secret = here("secret.y
   db_pass <- Sys.getenv("DB_PASS")
   if (file.exists(params)) {
     params_dict <- read_yaml(params)
-    if (db_host == "" && !is.null(params_dict[[key]]$db_host)) db_host <- db_params_dict[[key]]$db_host
-    if (db_name == "" && !is.null(params_dict[[key]]$db_name)) db_name <- db_params_dict[[key]]$db_name
-    if (db_user == "" && !is.null(params_dict[[key]]$db_user)) db_user <- db_params_dict[[key]]$db_user
+    if (db_host == "" && !is.null(params_dict[[key]]$db_host)) db_host <- params_dict[[key]]$db_host
+    if (db_name == "" && !is.null(params_dict[[key]]$db_name)) db_name <- params_dict[[key]]$db_name
+    if (db_user == "" && !is.null(params_dict[[key]]$db_user)) db_user <- params_dict[[key]]$db_user
   }
   if (file.exists(secret)) {
     secret_dict <- read_yaml(secret)
-    if (db_host == "" && !is.null(secret_dict[[key]]$db_host)) db_host <- db_secret_dict[[key]]$db_host
-    if (db_name == "" && !is.null(secret_dict[[key]]$db_name)) db_name <- db_secret_dict[[key]]$db_name
-    if (db_user == "" && !is.null(secret_dict[[key]]$db_user)) db_user <- db_secret_dict[[key]]$db_user
-    if (db_pass == "" && !is.null(secret_dict[[key]]$db_pass)) db_pass <- db_secret_dict[[key]]$db_pass
+    if (db_host == "" && !is.null(secret_dict[[key]]$db_host)) db_host <- secret_dict[[key]]$db_host
+    if (db_name == "" && !is.null(secret_dict[[key]]$db_name)) db_name <- secret_dict[[key]]$db_name
+    if (db_user == "" && !is.null(secret_dict[[key]]$db_user)) db_user <- secret_dict[[key]]$db_user
+    if (db_pass == "" && !is.null(secret_dict[[key]]$db_pass)) db_pass <- secret_dict[[key]]$db_pass
   }
   if (db_host == "" || db_name == "") stop(str_c("Could not derive all required variables for database connectivity. Have db_host:", db_host, ", db_name:", db_name))
   return(dbConnect(
